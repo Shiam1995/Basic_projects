@@ -1,0 +1,2090 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+
+struct cellNumberstruct {
+
+    int row;
+    int col;
+};
+
+
+using namespace std;
+void printSudoku(int sudoku[9][9][10]);
+void printSudokuArray( int sudoku[9][9][10]);
+void solveSudoku ( int sudoku [9][9][10]);
+void convertcells(int sudoku[9][9][10]);
+void printallcells( int sudoku [9][9][10]); // temp function for ease
+int tellmehowmanyoptions ( int sudoku [9][9][10]);
+void overlaySudoku( int sudoku[9][9][10]);
+
+
+void horizontal( int sudoku[9][9][10]);
+void vertical( int sudoku[9][9][10]);
+void boxoptions(int sudoku[9][9][10]);
+
+void checkSingleNumberRows(int sudoku[9][9][10]);
+void checkSingleNumberBox(int sudoku[9][9][10]);
+void checkSingleNumberCols(int sudoku[9][9][10]);
+void checkForSingleInArray(int sudoku[9][9][10]);
+bool isValid(int sudoku[9][9][10]);
+bool isSolved(int sudoku[9][9][10]);
+void tryStrategies(int sudoku[9][9][10]);
+
+struct cellNumberstruct checkhowmanyoptionsincell(int sudoku[9][9][10]);
+void tellMeIfACellIsInvalid(int sudoku[9][9][10]);
+void makeCopy(int sudoku[9][9][10], int copySudoku[9][9][10]);
+void backtracker ( int sudoku[9][9][10]);
+bool backtrackerValidTester(int sudoku [9][9][10]);
+std::vector<int> optionsVector(int sudoku[9][9][10], struct cellNumberstruct lowestCell);
+// need to add a check if sudoku complete function
+// keep orignal sudoku
+// try lowest option could be 1 function itself
+
+
+
+
+
+
+void backtracker ( int sudoku[9][9][10])
+{
+
+
+    struct cellNumberstruct lowest = checkhowmanyoptionsincell(sudoku);
+    std::vector<int> options;
+    options = optionsVector(sudoku, lowest);
+    int copySudoku[9][9][10];
+    int i = 0;
+    bool answerforComplete = 0;
+    bool answerForInavlid = 1;
+
+    makeCopy(sudoku, copySudoku);
+
+
+    answerforComplete = isSolved(copySudoku);
+    if ( isSolved(sudoku) == 1)
+    {
+        // maybe make it global
+        printSudoku(copySudoku);
+        std::cout << "Finished" << std::endl;
+    }
+    answerForInavlid = isValid(copySudoku);
+    if ( answerForInavlid == 0)
+    {
+    }
+    for( i = 0; i < options.size();i++)
+    {
+    makeCopy(sudoku, copySudoku);
+    copySudoku[lowest.row][lowest.col][0] = options[i];
+    tryStrategies(copySudoku);
+    backtracker(copySudoku);
+    }
+}
+
+
+
+
+
+
+
+void solveSudoku ( int sudoku[9][9][10])
+{
+    //tellmehowmanyoptions(sudoku);
+    cellNumberstruct solutionStructure;
+    solutionStructure.row = 0;
+    solutionStructure.col = 0;
+    bool answer = 0;
+    int possibleOptionsStart = 0;
+    possibleOptionsStart = tellmehowmanyoptions(sudoku);
+    int possibleLoop = 0;
+    possibleLoop =  tellmehowmanyoptions(sudoku);
+    possibleLoop++;
+    int loopcount = 0;
+
+        std::cout << "First run through" << std::endl;
+
+    // work on this lop counter do while extra loop at the end
+    while ( possibleOptionsStart < possibleLoop && possibleOptionsStart != 0)
+    {
+        possibleLoop = possibleOptionsStart;
+        tryStrategies(sudoku);
+        possibleOptionsStart = tellmehowmanyoptions(sudoku);
+        //std::cout << "We are at loop :" << loopcount << " " << std::endl;
+        loopcount++;
+    }
+    //printSudoku(sudoku);
+    bool isTheSudokuSolved = 0;
+    isTheSudokuSolved = isSolved(sudoku);
+    //std::cout << "The answer is " << isTheSudokuSolved << std::endl;
+    //bool solved
+
+
+
+        solutionStructure = checkhowmanyoptionsincell(sudoku);
+
+        std::cout << "-----------" << std::endl;
+        std::cout << "-----------" << std::endl;
+        std::cout << "we need to back test " << std::endl;
+        //optionsVector(sudoku, solutionStructure);
+        backtracker(sudoku);
+
+
+        //std::cout << isValid(sudoku) << std::endl;
+
+
+
+
+
+}
+
+
+int main(void)
+{
+
+
+        srand(time(NULL));
+        std::cout << "Project 1 sudoku solver" << std::endl;
+
+        int testPuzzle[81] =
+
+
+        {
+        0,9,3,    0,0,0,   0,0,0,
+        2,0,0,    0,6,0,   0,8,0,
+        0,0,8,    0,7,0,   0,0,9,
+
+        8,0,0,    0,0,7,   1,0,0,
+        0,0,0,    0,0,0,   0,0,0,
+        5,0,0,    0,4,0,   0,2,0,
+
+        0,0,0,    0,0,3,   0,9,0,
+        3,5,0,    0,0,1,   0,0,2,
+        7,0,0,    0,0,5,   0,4,0
+        };
+
+
+/*
+        {
+        0,0,0,    0,2,3,   0,7,9,
+        0,0,4,    5,0,9,   0,0,0,
+        0,0,0,    7,0,0,   0,0,8,
+
+        5,6,0,    0,7,2,   0,0,0,
+        0,0,2,    0,5,0,   0,8,0,
+        1,0,7,    6,0,0,   0,0,4,
+
+        9,2,0,    0,1,7,   0,0,0,
+        0,0,0,    3,9,0,   0,0,6,
+        0,7,0,    0,0,5,   0,9,0
+        };
+*/
+
+/*
+        {
+        2,0,0,    6,0,9,   0,8,0,
+        0,0,0,    0,3,0,   7,0,0,
+        0,1,0,    0,0,0,   4,0,0,
+
+        0,0,8,    0,6,0,   0,0,5,
+        4,2,0,    1,0,0,   0,0,0,
+        0,0,0,    0,0,0,   2,0,0,
+
+        0,0,0,    0,9,0,   5,0,7,
+        7,0,0,    0,0,8,   0,0,6,
+        1,0,0,    0,0,3,   0,0,0,
+
+
+        };
+ */
+    /*    {
+        1,0,0,    0,0,0,   0,0,0,
+        0,0,0,    0,0,0,   0,0,0,
+        0,8,0,    0,0,0,   0,3,0,
+
+        0,0,0,    0,8,0,   0,0,0,
+        0,7,0,    0,4,0,   0,6,0,
+        0,0,0,    0,0,0,   0,0,0,
+
+        0,0,0,    0,3,0,   0,0,0,
+        0,9,0,    0,0,0,   0,4,0,
+        0,0,0,    2,0,0,   0,0,0,
+
+
+        };
+        */
+
+        // some cases need special attention
+        // find a way to stop when we have a valid answer
+        // find a way to test is sudoku has only 1 valid set of answer
+        // use global function
+
+
+
+
+        int i, j, k;
+        i = j = k = 0;
+        int sudoku[9][9][10];
+
+            for( i = 0; i < 9; i++)
+                {
+                    for(j = 0; j < 9 ; j++ )
+                    {
+                        for ( k = 0; k <= 9; k++)
+                        {
+                        sudoku[i][j][k] = k;
+                        }
+                    }
+                }
+        //printMultiArray(finalpuzzle);
+
+        for( i = 0; i < 9; i++)
+        {
+            for ( j = 0; j < 9; j++)
+            {
+                sudoku[i][j][0] = testPuzzle[(i*9)+j];
+            }
+        }
+
+        //printSudoku(sudoku);
+        //convertcells(sudoku);
+        solveSudoku(sudoku);
+
+        std::cout << "Finished program" << std::endl;
+
+
+}
+
+std::vector<int> optionsVector(int sudoku[9][9][10], struct cellNumberstruct lowestCell)
+{
+    int i, j, k = 0;
+    std::vector<int>options;
+     // int options = {0,0,0,0,0,0,0,0,0};
+
+    i = lowestCell.row;
+    j = lowestCell.col;
+    //std::cout << " cell row = " << lowestCell.row << std::endl;
+    //std::cout << " cell col = " << lowestCell.col << std::endl;
+
+
+
+    // vector is the wrong way round and this function doesnt accoutn for finshed sudoku
+            for( k = 1; k < 10; k++)
+            {
+                    if(sudoku[i][j][k] != 0)
+                    {
+         //           std::cout << "pushing back " << sudoku[i][j][k] << std::endl;
+                    options.push_back(sudoku[i][j][k]);
+                    }
+            }
+
+
+
+
+        //std::cout << " Cell " << lowestCell.row << " " << lowestCell.col << " has " << options.size() << " options" << std::endl;
+       //int counter = 0;
+       //for( counter; counter <= options.size()-1; counter++)
+       //{
+       //std::cout << options[counter] << std::endl;
+
+       //}
+
+        return options;
+}
+
+
+void tryStrategies( int sudoku[9][9][10]) // change overlay name
+{
+        // check valid
+        bool isSolvedBooleanAnswer = 0; // how to return a bool
+        horizontal(sudoku);
+        vertical(sudoku);
+        boxoptions(sudoku);
+        checkSingleNumberRows(sudoku);
+        checkSingleNumberCols(sudoku);
+        checkSingleNumberBox(sudoku);
+        checkForSingleInArray(sudoku);
+        overlaySudoku(sudoku);
+        //tellmehowmanyoptions(sudoku);
+        tellMeIfACellIsInvalid(sudoku);
+        //backtrackerValidTester(sudoku); its a bool put in function also is part of is solved so irrelvant
+        //printSudoku(sudoku);
+
+
+
+}
+void tryLowestoption(int sudoku[9][9][10], struct cellNumberstruct lowestCell) // might be crap
+{
+    int i, j, k = 0;
+     // int options = {0,0,0,0,0,0,0,0,0};
+
+    i = lowestCell.row;
+    j = lowestCell.col;
+    std::cout << " cell row = " << lowestCell.row << std::endl;
+    std::cout << " cell col = " << lowestCell.col << std::endl;
+
+
+            //if(sudoku[i][j][k] != 0)
+            for( k = 1; k < 10; k++)
+            {
+                    if(sudoku[i][j][k] != 0)
+                    {
+                    sudoku[i][j][0] = sudoku[i][j][k];
+                    break;
+                    }
+                    //std::cout << "made a change" << std::endl;
+
+            }
+}
+void makeCopy(int sudoku[9][9][10], int copySudoku[9][9][10])
+{
+
+    int i, j, k;
+    i = j = k = 0;
+
+    for( i = 0; i <= 8 ; i++)
+    {
+        for( j = 0; j <= 8; j++)
+        {
+            for( k = 0; k <= 10; k++ )
+            {
+                copySudoku[i][j][k] = sudoku[i][j][k]; // turn this is into a func
+            }
+        }
+    }
+
+}
+void tellMeIfACellIsInvalid(int sudoku[9][9][10])
+{
+    int i , j , k;
+    i = j = k = 0;
+    int options = 0;
+
+    for( i = 0; i < 9; i++)
+    {
+        for( j = 0 ; j < 9 ; j++ )
+        {
+            if ( sudoku[i][j][0] == 0)
+            {
+            for ( k = 1; k < 10; k++)
+                {
+                    if (sudoku[i][j][k] == 0)
+                    {
+                        options++;
+                    }
+                }
+                if(options == 9)
+                {
+                    //std::cout << " No good sudoku invalid cell [" << i << "," << j << "] has no options" << std::endl;
+
+                }
+                else
+                {
+                    options = 0;
+                }
+            }
+        }
+    }
+}
+struct cellNumberstruct checkhowmanyoptionsincell(int sudoku[9][9][10])
+// this assumes sudoku hasnt been filled
+{
+        int i,j,k;
+        i = j = k = 0;
+        int options = 0; // could be a better way than brute force
+        int answerToOptions = 9; // assumes there must be solutions left
+        cellNumberstruct mystructure;
+        mystructure.row = 9;
+        mystructure.col = 9;
+
+
+
+        for(i = 0; i < 9; i++)
+        {
+            for( j = 0; j < 9; j++)
+            {
+                for ( k = 1; k < 10; k++)
+                {
+                    if(sudoku[i][j][0] == 0)
+                    {
+                        if(sudoku[i][j][k] != 0)
+                        {
+                            options++;
+                        }
+                    }
+
+                }
+                    if(sudoku[i][j][0] == 0)
+                    {
+                    //std::cout << " cell i , j " << i << " " << j << " has " << options << std::endl;
+
+                        if(options < answerToOptions )
+                        {
+                            answerToOptions = options;
+                            mystructure.row = i;
+                            mystructure.col = j;
+                        }
+                    }
+                options = 0;
+
+            }
+        }
+
+
+        //std::cout << " cell row = " << mystructure.row << std::endl;
+        //std::cout << " cell col = " << mystructure.col << std::endl;
+
+        return mystructure;
+
+}
+void checkForSingleInArray(int sudoku[9][9][10])
+{
+        int i, j, k;
+        i = j = k = 0;
+        int numbercount = 0;
+        int value = 0;
+
+        for( i = 0; i < 9; i ++)
+        {
+            for (j = 0; j < 9; j++)
+            {
+
+               if(sudoku[i][j][0] == 0)
+               {
+
+                    for(k = 1; k < 10; k++)
+                    {
+                        if (sudoku[i][j][k] != 0)
+                        {
+                        value = sudoku[i][j][k];
+                        }
+                        else
+                        {
+                            numbercount++;
+                        }
+
+                        if (numbercount == 8)
+                        {
+                        //std::cout << "only 1 number can exist here and it is" << value <<std::endl;
+                        //std::cout << "also we are at location [i][j]" << i << " " << j << std::endl;
+                        sudoku[i][j][0] = value;
+                        sudoku[i][j][value] = 0;
+                        }
+                    }
+                    numbercount = 0;
+                    value = 0;
+                }
+            }
+        }
+}
+void horizontal( int sudoku[9][9][10])
+{
+    int i, j , k;
+    i = j = k = 0;
+    int cellanswer = 0;
+    //std::cout << " horizontal" << std::endl;
+
+        for( i = 0; i < 9; i++)
+        {
+            for(j = 0; j < 9 ; j++ )
+                {
+                      {
+                      if (sudoku[i][j][0] != 0)
+                        {
+                        cellanswer = sudoku[i][j][0];
+
+                            for( k = 0; k < 9; k++)
+                            {
+                            sudoku[i][k][cellanswer] = 0;
+                            }
+                        }
+                      }
+                }
+        }
+
+}
+void vertical( int sudoku[9][9][10])
+{
+    int i, j , k;
+    i = j = k = 0;
+    int cellanswer = 0;
+    //std::cout << " vertical" << std::endl;
+
+        for( i = 0; i < 9; i++)
+        {
+            for(j = 0; j < 9 ; j++ )
+                {
+                      {
+                      if (sudoku[i][j][0] != 0)
+                        {
+                        cellanswer = sudoku[i][j][0];
+
+                            for( k = 0; k < 9; k++)
+                            {
+                            sudoku[k][j][cellanswer] = 0;
+
+                            }
+                        }
+                      }
+                }
+        }
+
+}
+void boxoptions(int sudoku[9][9][10])
+{
+
+    int i, j , k;
+    i = j = k = 0;
+    //std::cout << " ---box---" << std::endl;
+        //std::cout  << std::endl;
+        //std::cout << std::endl;
+        //std::cout << std::endl;
+        k = 0;
+        for( i = 0; i < 9; i++)
+        {
+            for( j = 0; j < 9; j++ )
+            {
+
+                //std::cout << " cell is: [i,j] " << i << " ," << j << " : "
+                //<< sudoku[i][j][k] << std::endl;
+
+
+                int startpointrow = 0;
+                int startpointcol = 0;
+
+                startpointrow = i/3;
+                startpointcol = j/3;
+
+                //std::cout << " startrow = " << startpointrow << std::endl;
+                //std::cout << " startcol = " << startpointcol << std::endl;
+                //std::cout << std::endl;
+                //std::cout << std::endl;
+
+                startpointrow *= 3;
+                startpointcol *= 3;
+
+                //std::cout << " startrow = " << startpointrow << std::endl;
+                //std::cout << " startcol = " << startpointcol << std::endl;
+                //std::cout << std::endl;
+                //std::cout << std::endl;
+
+                int boxRow, boxCol;
+                boxRow = startpointrow;
+                boxCol = startpointcol;
+                int boxcellanswer = sudoku[i][j][0]; // this is the cell answer
+                int cellanswer = boxcellanswer;
+                int boxRowlimit = boxRow+2;
+                int boxCollimit = boxCol+2;
+
+                //std::cout << "cell is [i,j] = [" << i <<"," << j << "]" << " = " << sudoku[i][j][0] << std::endl;
+                //std::cout << std::endl;
+               // std::cout << std::endl;
+
+                for(boxRow; boxRow <= boxRowlimit; boxRow++)
+                {
+                    for(boxCol; boxCol<= boxCollimit; boxCol++)
+                    {
+
+                        //std::cout << "Box row = " << boxRow << std::endl;
+                        //std::cout << "Box row limit = " << boxRowlimit << std::endl;
+
+                        //std::cout << "Box col = " << boxCol << std::endl;
+                        //std::cout << "Box col limit = " << boxCollimit << std::endl;
+
+
+                        if(boxcellanswer != 0)
+                        {
+                        //std::cout << "Cell [boxrow,boxcol] = [" << boxRow << "," << boxCol << "]"
+                        //<< " sudoku[i][j][boxcellanswer] =  [ " << i << " " << j << " " <<
+                        //boxcellanswer+1 << " ] " << sudoku[i][j][boxcellanswer+1]
+                        //<< " should become 0" << std::endl;
+                        //std::cout << "boxcellanswer =  " << boxcellanswer << std::endl;
+                        sudoku[boxRow][boxCol][boxcellanswer] = 0;
+                        }
+                    }
+                   boxCol-=3;
+                   // change box col to starting col before the inner most for loop
+                   //bring in as function
+                }
+            }
+        }
+
+}
+void checkSingleNumberRows(int sudoku[9][9][10])
+{
+   // std::cout << " rows" << std::endl;
+        int answerCounter = 0;
+        int i, j , k;
+        i = j = k = 0;
+
+        for(i = 0; i < 9; i++)
+        {
+            k = 0;
+                //std::cout << std::endl;
+                for( k = 1; k < 10; k++)
+                {
+                     for( j = 0; j < 9; j++)
+                        {
+                            if(sudoku[i][j][k] == 0)
+                            {
+                            answerCounter++;
+                            }
+                        }
+                        if(answerCounter == 1)
+                        {
+                           // std::cout << "--------we have a single---- for :" << k <<std::endl;
+                        }
+
+                        //std::cout << " k  = " << k << " occurs : " <<
+                       // answerCounter << " times" << "in row : [" << i << "]" << std::endl;
+                        answerCounter = 0;
+                }
+            }
+
+}
+void checkSingleNumberCols(int sudoku[9][9][10])
+{
+    //std::cout << " col" << std::endl;
+    int answerCounter = 0;
+        int i, j , k;
+        i = j = k = 0;
+
+        for(i = 0; i < 9; i++)
+        {
+            k = 0;
+            //std::cout << std::endl;
+                for( k = 1; k < 10; k++)
+                {
+                     for( j = 0; j < 9; j++)
+                        {
+                            if(sudoku[j][i][k] == 0)
+                            {
+                            answerCounter++;
+                            }
+                        }
+                        if(answerCounter == 1)
+                        {
+                           // std::cout << "--------we have a single---- for :" << k <<std::endl;
+                        }
+                        //std::cout << " k  = " << k << " occurs : " <<
+                        //answerCounter << " times" << "in col : [" << i << "]" << std::endl;
+                        answerCounter = 0;
+                }
+            }
+
+}
+void checkSingleNumberBox(int sudoku[9][9][10])
+{
+
+            int answerCounter = 0;
+            int i, j , k;
+            i = j = k = 0;
+
+            //std::cout << "box 0 " << std::endl;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[0][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[0][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[0][2][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][2][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][2][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 0)" << std::endl;
+                if(answerCounter == 1)
+                {
+                    //std::cout << i << "(box 0) occurs only once" << std::endl;
+
+                    if(sudoku[0][0][i] == i)
+                        sudoku[0][0][0] = i;
+
+                    else if (sudoku[0][1][i] == i)
+                        sudoku[0][1][0] = i;
+
+                    else if (sudoku[0][2][i] == i)
+                        sudoku[0][2][0] = i;
+
+                    else if (sudoku[1][0][i] == i)
+                        sudoku[1][0][0] = i;
+
+                    else if (sudoku[1][1][i] == i)
+                        sudoku[1][1][0] = i;
+
+                    else if (sudoku[1][2][i] == i)
+                        sudoku[1][2][0] = i;
+
+                    else if (sudoku[2][0][i] == i)
+                        sudoku[2][0][0] = i;
+
+                    else if (sudoku[2][1][i] == i)
+                        sudoku[2][1][0] = i;
+
+                    else if (sudoku[2][2][i] == i)
+                        sudoku[2][2][0] = i;
+
+
+                }
+
+
+                answerCounter = 0;
+
+           }
+
+           //std::cout << "box 1 " << std::endl;
+           answerCounter = 0;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[0][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[0][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[0][5][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][5][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][5][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 1)" << std::endl;
+                if(answerCounter == 1)
+                {
+                   // std::cout << i << "box 1 occurs only once" << std::endl;
+
+                    if(sudoku[0][3][i] == i)
+                        sudoku[0][3][0] = i;
+
+                    else if (sudoku[0][4][i] == i)
+                        sudoku[0][4][0] = i;
+
+                    else if (sudoku[0][5][i] == i)
+                        sudoku[0][5][0] = i;
+
+                    else if (sudoku[1][3][i] == i)
+                        sudoku[1][3][0] = i;
+
+                    else if (sudoku[1][4][i] == i)
+                        sudoku[1][4][0] = i;
+
+                    else if (sudoku[1][5][i] == i)
+                        sudoku[1][5][0] = i;
+
+                    else if (sudoku[2][3][i] == i)
+                        sudoku[2][3][0] = i;
+
+                    else if (sudoku[2][4][i] == i)
+                        sudoku[2][4][0] = i;
+
+                    else if (sudoku[2][5][i] == i)
+                        sudoku[2][5][0] = i;
+
+
+                }
+
+
+
+                answerCounter = 0;
+
+           }
+
+
+           //std::cout << "box 2 " << std::endl;
+           answerCounter = 0;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[0][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[0][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[0][8][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[1][8][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[2][8][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 2)" << std::endl;
+
+                if(answerCounter == 1)
+                {
+                    //std::cout << i << " box 2 occurs only once" << std::endl;
+
+                    if(sudoku[0][6][i] == i)
+                        sudoku[0][6][0] = i;
+
+                    else if (sudoku[0][7][i] == i)
+                        sudoku[0][7][0] = i;
+
+                    else if (sudoku[0][8][i] == i)
+                        sudoku[0][8][0] = i;
+
+                    else if (sudoku[1][6][i] == i)
+                        sudoku[1][6][0] = i;
+
+                    else if (sudoku[1][7][i] == i)
+                        sudoku[1][7][0] = i;
+
+                    else if (sudoku[1][8][i] == i)
+                        sudoku[1][8][0] = i;
+
+                    else if (sudoku[2][6][i] == i)
+                        sudoku[2][6][0] = i;
+
+                    else if (sudoku[2][7][i] == i)
+                        sudoku[2][7][0] = i;
+
+                    else if (sudoku[2][8][i] == i)
+                        sudoku[2][8][0] = i;
+                }
+
+                answerCounter = 0;
+
+           }
+
+           //std::cout << "box 3 " << std::endl;
+           answerCounter = 0;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[3][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[3][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[3][2][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][2][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][2][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 3)" << std::endl;
+
+                if(answerCounter == 1)
+                {
+                    //std::cout << i << " occurs only once" << std::endl;
+
+                    if(sudoku[3][0][i] == i)
+                        sudoku[3][0][0] = i;
+
+                    else if (sudoku[3][1][i] == i)
+                        sudoku[3][1][0] = i;
+
+                    else if (sudoku[3][2][i] == i)
+                        sudoku[3][2][0] = i;
+
+                    else if (sudoku[4][0][i] == i)
+                        sudoku[4][0][0] = i;
+
+                    else if (sudoku[4][1][i] == i)
+                        sudoku[4][1][0] = i;
+
+                    else if (sudoku[4][2][i] == i)
+                        sudoku[4][2][0] = i;
+
+                    else if (sudoku[5][0][i] == i)
+                        sudoku[5][0][0] = i;
+
+                    else if (sudoku[5][1][i] == i)
+                        sudoku[5][1][0] = i;
+
+                    else if (sudoku[5][2][i] == i)
+                        sudoku[5][2][0] = i;
+
+               }
+
+
+           answerCounter = 0;
+           }
+
+
+            //std::cout << "box 4 " << std::endl;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[3][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[3][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[3][5][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][5][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][5][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 4)" << std::endl;
+
+               if(answerCounter == 1)
+                {
+                    //std::cout << i << " occurs only once" << std::endl;
+
+
+                if(sudoku[3][3][i] == i)
+                        sudoku[3][3][0] = i;
+
+                    else if (sudoku[3][4][i] == i)
+                        sudoku[3][4][0] = i;
+
+                    else if (sudoku[3][5][i] == i)
+                        sudoku[3][5][0] = i;
+
+                    else if (sudoku[4][3][i] == i)
+                        sudoku[4][3][0] = i;
+
+                    else if (sudoku[4][4][i] == i)
+                        sudoku[4][4][0] = i;
+
+                    else if (sudoku[4][5][i] == i)
+                        sudoku[4][5][0] = i;
+
+                    else if (sudoku[5][3][i] == i)
+                        sudoku[5][3][0] = i;
+
+                    else if (sudoku[5][4][i] == i)
+                        sudoku[5][4][0] = i;
+
+                    else if (sudoku[5][5][i] == i)
+                        sudoku[5][5][0] = i;
+
+
+                }
+                answerCounter = 0;
+
+           }
+
+
+           //std::cout << "box 5 " << std::endl;
+           answerCounter = 0;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[3][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[3][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[3][8][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[4][8][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[5][8][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 5)" << std::endl;
+                if(answerCounter == 1)
+                {
+                   // std::cout << i << " occurs only once" << std::endl;
+
+                    if(sudoku[3][6][i] == i)
+                        sudoku[3][6][0] = i;
+
+                    else if (sudoku[3][7][i] == i)
+                        sudoku[3][7][0] = i;
+
+                    else if (sudoku[3][8][i] == i)
+                        sudoku[3][8][0] = i;
+
+                    else if (sudoku[4][6][i] == i)
+                        sudoku[4][6][0] = i;
+
+                    else if (sudoku[4][7][i] == i)
+                        sudoku[4][7][0] = i;
+
+                    else if (sudoku[4][8][i] == i)
+                        sudoku[4][8][0] = i;
+
+                    else if (sudoku[5][6][i] == i)
+                        sudoku[5][6][0] = i;
+
+                    else if (sudoku[5][7][i] == i)
+                        sudoku[5][7][0] = i;
+
+                    else if (sudoku[5][8][i] == i)
+                        sudoku[5][8][0] = i;
+                }
+
+                answerCounter = 0;
+
+           }
+
+
+           //std::cout << "box 6 " << std::endl;
+           answerCounter = 0;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[6][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[6][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[6][2][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][2][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][0][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][1][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][2][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 6)" << std::endl;
+                if(answerCounter == 1)
+                {
+                   // std::cout << i << " occurs only once" << std::endl;
+
+                    if(sudoku[6][0][i] == i)
+                        sudoku[6][0][0] = i;
+
+                    else if (sudoku[6][1][i] == i)
+                        sudoku[6][1][0] = i;
+
+                    else if (sudoku[6][2][i] == i)
+                        sudoku[6][2][0] = i;
+
+                    else if (sudoku[7][0][i] == i)
+                        sudoku[7][0][0] = i;
+
+                    else if (sudoku[7][1][i] == i)
+                        sudoku[7][1][0] = i;
+
+                    else if (sudoku[7][2][i] == i)
+                        sudoku[7][2][0] = i;
+
+                    else if (sudoku[8][0][i] == i)
+                        sudoku[8][0][0] = i;
+
+                    else if (sudoku[8][1][i] == i)
+                        sudoku[8][1][0] = i;
+
+                    else if (sudoku[8][2][i] == i)
+                        sudoku[8][2][0] = i;
+
+               }
+
+
+                answerCounter = 0;
+
+           }
+
+
+           //std::cout << "box 7 " << std::endl;
+           answerCounter = 0;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[6][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[6][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[6][5][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][5][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][3][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][4][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][5][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 7)" << std::endl;
+                 if(answerCounter == 1)
+                {
+                   // std::cout << i << " occurs only once" << std::endl;
+
+
+                if(sudoku[6][3][i] == i)
+                        sudoku[6][3][0] = i;
+
+                    else if (sudoku[6][4][i] == i)
+                        sudoku[6][4][0] = i;
+
+                    else if (sudoku[6][5][i] == i)
+                        sudoku[6][5][0] = i;
+
+                    else if (sudoku[7][3][i] == i)
+                        sudoku[7][3][0] = i;
+
+                    else if (sudoku[7][4][i] == i)
+                        sudoku[7][4][0] = i;
+
+                    else if (sudoku[7][5][i] == i)
+                        sudoku[7][5][0] = i;
+
+                    else if (sudoku[8][3][i] == i)
+                        sudoku[8][3][0] = i;
+
+                    else if (sudoku[8][4][i] == i)
+                        sudoku[8][4][0] = i;
+
+                    else if (sudoku[8][5][i] == i)
+                        sudoku[8][5][0] = i;
+
+
+                }
+                answerCounter = 0;
+
+           }
+
+
+           //std::cout << "box 8 " << std::endl;
+           answerCounter = 0;
+           for( i = 1; i < 10; i++)
+           {
+                if( sudoku[6][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[6][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[6][8][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[7][8][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][6][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][7][i] != 0 )
+                    answerCounter++;
+                if( sudoku[8][8][i] != 0 )
+                    answerCounter++;
+                //std::cout << i << " occurs " << answerCounter << " times (box 8)" << std::endl;
+
+                if(answerCounter == 1)
+                {
+                    //std::cout << i << " occurs only once" << std::endl;
+
+                    if(sudoku[6][6][i] == i)
+                        sudoku[6][6][0] = i;
+
+                    else if (sudoku[6][7][i] == i)
+                        sudoku[6][7][0] = i;
+
+                    else if (sudoku[6][8][i] == i)
+                        sudoku[6][8][0] = i;
+
+                    else if (sudoku[7][6][i] == i)
+                        sudoku[7][6][0] = i;
+
+                    else if (sudoku[7][7][i] == i)
+                        sudoku[7][7][0] = i;
+
+                    else if (sudoku[7][8][i] == i)
+                        sudoku[7][8][0] = i;
+
+                    else if (sudoku[8][6][i] == i)
+                        sudoku[8][6][0] = i;
+
+                    else if (sudoku[8][7][i] == i)
+                        sudoku[8][7][0] = i;
+
+                    else if (sudoku[8][8][i] == i)
+                        sudoku[8][8][0] = i;
+                }
+
+                answerCounter = 0;
+
+           }
+           //std::cout << "box checker works" << std::endl;
+
+
+}
+void overlaySudoku( int sudoku[9][9][10])
+{
+
+    int i, j , k;
+    i = j = k = 0;
+    int cellanswer = 0;
+
+    for( i = 0; i < 9; i++)
+        {
+            for(j = 0; j < 9 ; j++ )
+                {
+                      {
+                      if (sudoku[i][j][0] != 0)
+                        {
+                        cellanswer = sudoku[i][j][0];
+
+                        for( k = 1; k <= 9; k++)
+                            {
+                            sudoku[i][j][k] = 0;
+                            }
+                        }
+                      }
+                }
+        }
+}
+void printSudokuArray( int puzzle[9][9][10])
+{
+        int i, j , k;
+        i = j = k = 0;
+        int counter = 0;
+
+         for( i = 0; i < 9; i++)
+                {
+                    for(j = 0; j < 9 ; j++ )
+                    {
+                        printf("[%3d ] ", counter);
+                        counter++;
+                        for ( k = 0; k <= 9; k++)
+                        {
+                        std::cout << " " << puzzle[i][j][k] << " ";
+                        }
+                        std::cout << std::endl;
+                    }
+                }
+}
+void printSudoku(int sudoku[9][9][10])
+{
+    int i, j , k;
+    i = j = k = 0;
+
+    for( i = 0; i < 9; i++)
+        {
+            for(j = 0; j < 9 ; j++ )
+                {
+                      if( j == 3 || j == 6)
+                      {
+                        std::cout << " | ";
+                      }
+                      std::cout << " " << sudoku[i][j][k] << " ";
+                }
+               std::cout << std::endl;
+               if ( i == 2 || i == 5)
+               {
+
+                std::cout << "--------------------------------" << std::endl;
+                }
+
+        }
+
+}
+void convertcells(int sudoku[9][9][10])
+{
+    printSudoku(sudoku);
+    int i , j , k;
+    i = j = k = 0;
+
+    for( i = 0; i < 9; i++)
+    {
+        for( j = 0; j < 9 ; j++)
+        {
+
+              cout << "i = " << i <<  " j = " << j  <<
+              " convert i = " << i/3 <<  " j = " << j/3  << endl;
+
+        }
+    }
+
+
+}
+void printallcells( int sudoku [9][9][10])
+{
+    int i , j , k;
+    i = j = k = 0;
+
+    for( i = 0; i < 9; i++)
+    {
+        for ( j = 0; j < 9; j++)
+        {
+            std::cout << "cell [i,j] = [" << i << "," << j << "] " << sudoku[i][j][k] << std::endl;
+        }
+    }
+
+}
+int tellmehowmanyoptions ( int sudoku [9][9][10])
+{
+        int i, j ,k;
+        i = j = k = 0;
+        int totaloptions = 0;
+        int celloptions = 0;
+        for( i = 0; i < 9; i++)
+        {
+            for( j = 0; j < 9; j++)
+            {
+
+                    k = 0; // might be redundant
+                    if (sudoku[i][j][k] == 0)
+                    {
+                        for( k = 1; k < 10; k++)
+                        {
+                            if(sudoku[i][j][k] != 0)
+                            {
+                                totaloptions++;
+                            }
+                        }
+                    }
+
+            }
+        }
+
+        //std::cout << std::endl;
+         //std::cout << "Total options: " << totaloptions << std::endl;
+
+         return totaloptions;
+
+
+
+}
+void tryoptions( int sudoku[9][9][10]) // maybe useless
+{
+    int i, j , k;
+    i = j = k = 0;
+    int value = 1;
+
+    while( value != 0)
+    {
+
+    for (i = 0; i < 9; i++)
+    {
+        for( j = 0; j < 9; j++)
+        {
+            if(sudoku[i][j][0] == 0 )
+            {
+                for(k = 1; k < 10; k++)
+                {
+                    if (sudoku[i][j][k] != 0)
+                    {
+
+                        sudoku[i][j][0] = sudoku[i][j][k];
+                        break;
+                        value = 0;
+
+                    }
+                }
+            }
+        }
+
+    }
+
+    }// while outer loop
+
+}
+// this isvalid is pruning a correct tree
+// make a second general invalid later
+
+bool isValid(int sudoku[9][9][10]) // maybe rewrite later // could be made more effiencet
+// checks if a the answer is emoty and if there are viable options
+{
+    bool startState = true; // 1 is true
+
+    int cellOption = 0;
+    int i, j , k;
+    i = j = k = 0;
+
+    for(i = 0; i < 9 ; i++)
+    {
+        for( j = 0; j < 9; j++)
+        {
+            if(sudoku[i][j][0] == 0)
+            {
+                for(k = 1; k < 10; k++)
+                {
+                    cellOption+= sudoku[i][j][k];
+                }
+                if (cellOption == 0)
+                {
+                //std::cout << "Cell " << i << j << " is not valid" << std::endl;
+                return false;
+                }
+                else
+                {
+                cellOption = 0;
+                }
+
+            }
+        }
+    }
+        return startState;
+}
+
+bool isSolved(int sudoku[9][9][10])
+{
+    bool startState = 0; // 1 is true
+
+    //int cellOption = 0;
+    int i, j , k;
+    i = j = k = 0;
+    int sum  = 0;
+
+    int oneCount = 0;
+    int twoCount = 0;
+    int threeCount = 0;
+    int fourCount = 0;
+    int fiveCount = 0;
+    int sixCount = 0;
+    int sevenCount = 0;
+    int eightCount = 0;
+    int nineCount = 0;
+
+     for(i = 0; i < 9 ; i++)
+    {
+        for( j = 0; j < 9; j++)
+        {
+            if(sudoku[i][j][0] == 0)
+            {
+               return false;
+            }
+        }
+    }
+
+    //std::cout << " we have no empty cells" << std::endl;
+
+
+    for ( i = 0; i < 9; i++)
+    {
+        for(j = 0; j < 9; j++ )
+        {
+        sum+=sudoku[i][j][0];
+        }
+    }
+
+
+    if (sum != 405)
+    {
+        return false;
+
+    }
+
+    //std::cout << " we the have the right sum NOW = " << sum << std::endl;
+
+
+    int rowsum = 0;
+    for( i = 0; i < 9; i++)
+    {
+        for( j = 0; j < 9; j++)
+        {
+            rowsum+= sudoku[i][j][0];
+        }
+        if(rowsum != 45)
+            {
+                //std::cout << "Row " << i << "invalid" << std::endl;
+                return false;
+            }
+        rowsum = 0;
+
+    }
+
+    //std::cout << " we the have the right rows = " << std::endl;
+
+    int colsum = 0;
+    for( i = 0; i < 9; i++)
+    {
+        for( j = 0; j < 9; j++)
+        {
+            colsum+= sudoku[j][i][0];
+        }
+        if(colsum != 45)
+            {
+               // std::cout << "col " << i << "invalid" << std::endl;
+                return false;
+            }
+        colsum = 0;
+
+    }
+
+    //std::cout << " we the have the right cols = " << std::endl;
+
+
+    for(i = 0; i < 9; i++)
+    {
+        for(j = 0; j < 9; j++)
+        {
+            if(sudoku[i][j][0] == 1)
+                oneCount++;
+            else if(sudoku[i][j][0] == 2)
+                twoCount++;
+            else if(sudoku[i][j][0] == 3)
+                threeCount++;
+            else if(sudoku[i][j][0] == 4)
+                fourCount++;
+            else if(sudoku[i][j][0] == 5)
+                fiveCount++;
+            else if(sudoku[i][j][0] == 6)
+                sixCount++;
+            else if(sudoku[i][j][0] == 7)
+                sevenCount++;
+            else if(sudoku[i][j][0] == 8)
+                eightCount++;
+            else if(sudoku[i][j][0] == 9)
+                nineCount++;
+        }
+    }
+
+    if(oneCount != 9)
+    {
+       // std::cout << "Need more 1s one count =  " << oneCount << std::endl;
+        return false;
+    }
+     if(twoCount != 9)
+    {
+    //    std::cout << "Need more 2s " << std::endl;
+        return false;
+    }
+     if(threeCount != 9)
+    {
+    //    std::cout << "Need more 3s " << std::endl;
+        return false;
+    }
+     if(fourCount != 9)
+    {
+    //    std::cout << "Need more 4s " << std::endl;
+        return false;
+    }
+     if(fiveCount != 9)
+    {
+     //   std::cout << "Need more 5s " << std::endl;
+        return false;
+    }
+     if(sixCount != 9)
+    {
+    //    std::cout << "Need more 6s " << std::endl;
+        return false;
+    }
+     if(sevenCount != 9)
+    {
+    //    std::cout << "Need more 7s " << std::endl;
+        return false;
+    }
+     if(eightCount != 9)
+    {
+      //  std::cout << "Need more 8s " << std::endl;
+        return false;
+    }
+     if(nineCount != 9)
+    {
+      //  std::cout << "Need more 9s " << std::endl;
+        return false;
+    }
+
+
+
+     oneCount = 0;
+     twoCount = 0;
+     threeCount = 0;
+     fourCount = 0;
+     fiveCount = 0;
+     sixCount = 0;
+     sevenCount = 0;
+     eightCount = 0;
+     nineCount = 0;
+
+    for(i = 0; i < 9; i++)
+    {
+        for(j = 0; j < 9; j++)
+        {
+            if(sudoku[i][j][0] == 1)
+                oneCount++;
+            else if(sudoku[i][j][0] == 2)
+                twoCount++;
+            else if(sudoku[i][j][0] == 3)
+                threeCount++;
+            else if(sudoku[i][j][0] == 4)
+                fourCount++;
+            else if(sudoku[i][j][0] == 5)
+                fiveCount++;
+            else if(sudoku[i][j][0] == 6)
+                sixCount++;
+            else if(sudoku[i][j][0] == 7)
+                sevenCount++;
+            else if(sudoku[i][j][0] == 8)
+                eightCount++;
+            else if(sudoku[i][j][0] == 9)
+                nineCount++;
+        }
+
+        if (oneCount > 1)
+        {
+            std::cout << " too many ones" << std::endl;
+            return false;
+
+        }
+        if (twoCount > 1)
+        {
+            std::cout << " too many twos" << std::endl;
+            return false;
+        }
+        if (threeCount > 1)
+        {
+            std::cout << " too many threes" << std::endl;
+            return false;
+        }
+        if (fourCount > 1)
+        {
+            std::cout << " too many fours" << std::endl;
+            return false;
+        }
+        if (fiveCount > 1)
+        {
+            std::cout << " too many fives" << std::endl;
+            return false;
+        }
+        if (sixCount > 1)
+        {
+            std::cout << " too many sixes" << std::endl;
+            return false;
+        }
+        if (sevenCount > 1)
+        {
+            std::cout << " too many sevens" << std::endl;
+            return false;
+        }
+        if (eightCount > 1)
+        {
+            std::cout << " too many eights" << std::endl;
+            return false;
+        }
+        if (nineCount > 1)
+        {
+            std::cout << " too many nines" << std::endl;
+            return false;
+        }
+
+     oneCount = 0;
+     twoCount = 0;
+     threeCount = 0;
+     fourCount = 0;
+     fiveCount = 0;
+     sixCount = 0;
+     sevenCount = 0;
+     eightCount = 0;
+     nineCount = 0;
+
+    } // rows done
+
+    for(i = 0; i < 9; i++)
+    {
+        for(j = 0; j < 9; j++)
+        {
+            if(sudoku[j][i][0] == 1)
+                oneCount++;
+            else if(sudoku[j][i][0] == 2)
+                twoCount++;
+            else if(sudoku[j][i][0] == 3)
+                threeCount++;
+            else if(sudoku[j][i][0] == 4)
+                fourCount++;
+            else if(sudoku[j][i][0] == 5)
+                fiveCount++;
+            else if(sudoku[j][i][0] == 6)
+                sixCount++;
+            else if(sudoku[j][i][0] == 7)
+                sevenCount++;
+            else if(sudoku[j][i][0] == 8)
+                eightCount++;
+            else if(sudoku[j][i][0] == 9)
+                nineCount++;
+        }
+
+        if (oneCount > 1)
+        {
+            //std::cout << " too many ones" << std::endl;
+            return false;
+        }
+        if (twoCount > 1)
+        {
+            //std::cout << " too many twos" << std::endl;
+            return false;
+        }
+        if (threeCount > 1)
+        {
+            //std::cout << " too many threes" << std::endl;
+            return false;
+        }
+        if (fourCount > 1)
+        {
+            //std::cout << " too many fours" << std::endl;
+            return false;
+        }
+        if (fiveCount > 1)
+        {
+            //std::cout << " too many fives" << std::endl;
+            return false;
+        }
+        if (sixCount > 1)
+        {
+            //std::cout << " too many sixes" << std::endl;
+            return false;
+        }
+        if (sevenCount > 1)
+        {
+            //std::cout << " too many sevens" << std::endl;
+            return false;
+        }
+        if (eightCount > 1)
+        {
+           // std::cout << " too many eights" << std::endl;
+            return false;
+        }
+        if (nineCount > 1)
+        {
+           // std::cout << " too many nines" << std::endl;
+            return false;
+        }
+
+     oneCount = 0;
+     twoCount = 0;
+     threeCount = 0;
+     fourCount = 0;
+     fiveCount = 0;
+     sixCount = 0;
+     sevenCount = 0;
+     eightCount = 0;
+     nineCount = 0;
+    }
+
+    /*
+    std::cout << " we have the right number of digits " << std::endl;
+    std::cout << "onecount = " << oneCount << std::endl;
+    std::cout << "twocount = " << twoCount << std::endl;
+    std::cout << "threecount = " << threeCount << std::endl;
+    std::cout << "fourcount = " << fourCount << std::endl;
+    std::cout << "fivecount = " << fiveCount << std::endl;
+    std::cout << "sixcount = " << sixCount << std::endl;
+    std::cout << "sevencount = " << sevenCount << std::endl;
+    std::cout << "eightcount = " << eightCount << std::endl;
+    std::cout << "ninecount = " << nineCount << std::endl;
+    */
+
+
+
+
+        //std::cout << "We have solved the sudoku" << std::endl;
+        //std::cout << "We have solved the sudoku" << std::endl;
+
+
+        //printSudoku(sudoku);
+        //printSudokuArray(sudoku);
+
+
+        //std::cout << "We have solved the sudoku" << std::endl;
+        //std::cout << "We have solved the sudoku" << std::endl;
+
+        return true;
+
+}
+
+
+bool backtrackerValidTester(int sudoku [9][9][10])
+{
+    int i, j, k;
+    i = j = k = 0;
+
+    // a unique number counter might be easier
+    // maybe sum
+    int oneCount = 0;
+    int twoCount = 0;
+    int threeCount = 0;
+    int fourCount = 0;
+    int fiveCount = 0;
+    int sixCount = 0;
+    int sevenCount = 0;
+    int eightCount = 0;
+    int nineCount = 0;
+
+    for(i = 0; i < 9; i++)
+    {
+        for(j = 0; j < 9; j++)
+        {
+            if(sudoku[i][j][0] == 1)
+                oneCount++;
+            else if(sudoku[i][j][0] == 2)
+                twoCount++;
+            else if(sudoku[i][j][0] == 3)
+                threeCount++;
+            else if(sudoku[i][j][0] == 4)
+                fourCount++;
+            else if(sudoku[i][j][0] == 5)
+                fiveCount++;
+            else if(sudoku[i][j][0] == 6)
+                sixCount++;
+            else if(sudoku[i][j][0] == 7)
+                sevenCount++;
+            else if(sudoku[i][j][0] == 8)
+                eightCount++;
+            else if(sudoku[i][j][0] == 9)
+                nineCount++;
+        }
+
+        if (oneCount > 1)
+        {
+            //std::cout << " too many ones" << std::endl;
+            return false;
+
+        }
+        if (twoCount > 1)
+        {
+            //std::cout << " too many twos" << std::endl;
+            return false;
+        }
+        if (threeCount > 1)
+        {
+            //std::cout << " too many threes" << std::endl;
+            return false;
+        }
+        if (fourCount > 1)
+        {
+           // std::cout << " too many fours" << std::endl;
+            return false;
+        }
+        if (fiveCount > 1)
+        {
+            //std::cout << " too many fives" << std::endl;
+            return false;
+        }
+        if (sixCount > 1)
+        {
+            //std::cout << " too many sixes" << std::endl;
+            return false;
+        }
+        if (sevenCount > 1)
+        {
+            //std::cout << " too many sevens" << std::endl;
+            return false;
+        }
+        if (eightCount > 1)
+        {
+            //std::cout << " too many eights" << std::endl;
+            return false;
+        }
+        if (nineCount > 1)
+        {
+            //std::cout << " too many nines" << std::endl;
+            return false;
+        }
+
+     oneCount = 0;
+     twoCount = 0;
+     threeCount = 0;
+     fourCount = 0;
+     fiveCount = 0;
+     sixCount = 0;
+     sevenCount = 0;
+     eightCount = 0;
+     nineCount = 0;
+
+    } // rows done
+
+    for(i = 0; i < 9; i++)
+    {
+        for(j = 0; j < 9; j++)
+        {
+            if(sudoku[j][i][0] == 1)
+                oneCount++;
+            else if(sudoku[j][i][0] == 2)
+                twoCount++;
+            else if(sudoku[j][i][0] == 3)
+                threeCount++;
+            else if(sudoku[j][i][0] == 4)
+                fourCount++;
+            else if(sudoku[j][i][0] == 5)
+                fiveCount++;
+            else if(sudoku[j][i][0] == 6)
+                sixCount++;
+            else if(sudoku[j][i][0] == 7)
+                sevenCount++;
+            else if(sudoku[j][i][0] == 8)
+                eightCount++;
+            else if(sudoku[j][i][0] == 9)
+                nineCount++;
+        }
+
+        if (oneCount > 1)
+        {
+            //std::cout << " too many ones" << std::endl;
+            return false;
+        }
+        if (twoCount > 1)
+        {
+            //std::cout << " too many twos" << std::endl;
+            return false;
+        }
+        if (threeCount > 1)
+        {
+            //std::cout << " too many threes" << std::endl;
+            return false;
+        }
+        if (fourCount > 1)
+        {
+            //std::cout << " too many fours" << std::endl;
+            return false;
+        }
+        if (fiveCount > 1)
+        {
+            //std::cout << " too many fives" << std::endl;
+            return false;
+        }
+        if (sixCount > 1)
+        {
+            //std::cout << " too many sixes" << std::endl;
+            return false;
+        }
+        if (sevenCount > 1)
+        {
+            //std::cout << " too many sevens" << std::endl;
+            return false;
+        }
+        if (eightCount > 1)
+        {
+           // std::cout << " too many eights" << std::endl;
+            return false;
+        }
+        if (nineCount > 1)
+        {
+           // std::cout << " too many nines" << std::endl;
+            return false;
+        }
+
+     oneCount = 0;
+     twoCount = 0;
+     threeCount = 0;
+     fourCount = 0;
+     fiveCount = 0;
+     sixCount = 0;
+     sevenCount = 0;
+     eightCount = 0;
+     nineCount = 0;
+
+
+
+
+    }
+
+}
+// can be bothered to use an array
+// should i pass a pointer to a the array
+// should i just have a function give me sudoku
+
+// lets just test returning a completely new sudoku
+// can pass pointer or array element
+// lets use pointers when pointers are used for the sake of contnity
+// check time and operation
+// void brute force
+// valid sudoku checker
+// take sorted sudoku and swap
+// make a program to generate random puzzles and see how long until 1 is valid
+// generator and solver in background
+// int puzzle[80] vs int puzzle[9][9] vs puzzle;
+// check if sudoku is well formed and has only one solution
+// use a class
+// add conversion
+// recursive function and back track
+// can i make a fuunction that create any size x sudoku board
+// log file then video demonstration
+// explaining principle
+// can i make a 100% certain cell a const
+// hidden pair, if t candidates appear in 2 cells you can be sure the other numbersdont matter
+// line row, if one number appears in only 1 box in the line it must be correct
+// add in single row and col checker
+// then we need to do a try first search
+// that copies sudoku
+// check is sudoku provided is valid
+// what would happen if i give it blank sudoku or gave it a single number
+
+// what is my base case
+
+
+/* random puzzle
+
+        0,0,0,    0,2,3,   0,7,9,
+        0,0,4,    5,0,9,   0,0,0,
+        0,0,0,    7,0,0,   0,0,8,
+
+        5,6,0,    0,7,2,   0,0,0,
+        0,0,2,    0,5,0,   0,8,0,
+        1,0,7,    6,0,0,   0,0,4,
+
+        9,2,0,    0,1,7,   0,0,0,
+        0,0,0,    3,9,0,   0,0,6,
+        0,7,0,    0,0,5,   0,9,0
+*/
+
+        /* random puzzle medium
+
+        8,7,0,    0,0,6,   0,3,0,
+        2,5,6,    0,0,0,   9,0,0,
+        0,4,9,    0,0,0,   0,0,0,
+
+        0,0,0,    5,0,0,   0,0,0,
+        9,0,0,    0,4,2,   8,6,0,
+        0,0,0,    0,0,7,   0,0,4,
+
+        5,9,0,    7,0,0,   0,0,2,
+        0,3,0,    0,0,5,   0,4,0,
+        7,0,0,    2,0,9,   0,5,8
+*/
+
+/* random puzzle hard
+
+        0,9,3,    0,0,0,   0,0,0,
+        2,0,0,    0,6,0,   0,8,0,
+        0,0,8,    0,7,0,   0,0,9,
+
+        8,0,0,    0,0,7,   1,0,0,
+        0,0,0,    0,0,0,   0,0,0,
+        5,0,0,    0,4,0,   0,2,0,
+
+        0,0,0,    0,0,3,   0,9,0,
+        3,5,0,    0,0,1,   0,0,2,
+        7,0,0,    0,0,5,   0,4,0
+*/
+
+// not sure the sudoku is represented right , or about the multi-dimensional array
+// hard sudoku logic didnt work
+// get depth first search done
+// then make gui
+// use more efficient dpth first
+//  check is there no valid option then return false
+// all these assume the soduku is valid
+// if the sudoku is ever solved should returen a finished function
+// make sudoku entirely plain
+//void CheckSudokuForComplete
+
+
